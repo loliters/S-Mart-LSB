@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>📈 Entrenamiento del Modelo</h1>
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <canvas id="accuracyChart"></canvas>
+        </div>
+        <div class="col-md-6">
+            <canvas id="lossChart"></canvas>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5>Métricas finales</h5>
+                    {% if history %}
+                        <p>Precisión final: {{ history.accuracy|last|floatformat:3 }}</p>
+                        <p>Pérdida final: {{ history.loss|last|floatformat:3 }}</p>
+                        <p>Precisión validación: {{ history.val_accuracy|last|floatformat:3 }}</p>
+                    {% else %}
+                        <p>No hay historial de entrenamiento. Inicia uno nuevo.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+{% if history %}
+    const ctx1 = document.getElementById('accuracyChart').getContext('2d');
+    new Chart(ctx1, {
+        type: 'line',
+        data: {
+            labels: {{ history.accuracy|length|make_list|slice:":-1"|join:"," }},  // Rango de épocas
+            datasets: [
+                {
+                    label: 'Precisión entrenamiento',
+                    data: {{ history.accuracy|safe }},
+                    borderColor: 'blue',
+                    fill: false
+                },
+                {
+                    label: 'Precisión validación',
+                    data: {{ history.val_accuracy|safe }},
+                    borderColor: 'green',
+                    fill: false
+                }
+            ]
+        }
+    });
+{% endif %}
+</script>
+{% endblock %}
